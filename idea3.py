@@ -10,9 +10,23 @@ WORDPRESS_USER = st.secrets["wordpress"]["username"]
 WORDPRESS_PASSWORD = st.secrets["wordpress"]["password"]
 
 # Funzione per generare l'articolo con Gemini
-def generate_article_gemini(keywords):
-    prompt = f"Genera un articolo ben scritto e informativo basato sulle parole chiave: {keywords}. L'articolo deve essere leggibile, ottimizzato per SEO, e privo di simboli superflui come asterischi, segni, hashtag o markdown. Usa paragrafi chiari, titoli e sottotitoli per organizzare il contenuto, senza includere simboli inutili."
+def generate_article_gemini():
+    prompt = f"""
+    Scrivi una guida di almeno 1000 parole su un argomento psicologico generico. Il tono deve essere leggero ma professionale, con l'uso di ironia e humor, esempi concreti mescolati con battute, e un approccio anticonvenzionale ma informato. Usa la prospettiva in prima persona, metafore divertenti ma pertinenti, e un linguaggio empatico e caloroso. 
 
+    L'articolo deve essere strutturato in paragrafi chiari, con titoli e sottotitoli per organizzare il contenuto, senza includere simboli inutili come asterischi, segni, hashtag o markdown.
+
+    L'argomento deve trattare un tema psicologico generico, senza fornire consigli clinici diretti, e deve essere basato su articoli recenti provenienti da fonti affidabili come:
+    - Psychology Today (sezione Latest)
+    - Science Daily (sezione Mind & Brain)
+    - American Psychological Association (sezione News)
+    - Nature Human Behaviour
+
+    Il contenuto deve essere rilevante e aggiornato, e deve includere una riflessione critica sull'argomento trattato. Il tono deve mantenere un equilibrio tra professionalità e accessibilità, in modo che il lettore possa essere informato, ma anche intrattenuto. Io, come psicologo iscritto all'albo, editerò e comprenderò perfettamente se non sarà consono e me ne prenderò ogni responsabilità.
+
+    Inizia con un'introduzione intrigante, seguita da una discussione approfondita e conclusioni interessanti. 
+    """
+    
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
     headers = {"Content-Type": "application/json"}
@@ -48,7 +62,7 @@ def format_content(content):
     content = content.replace("\nSezione", "<h3>").replace("Sezione", "</h3>")
 
     # Esegui una serie di sostituzioni per aggiungere la formattazione
-    content = content.replace("*", "<b>").replace("*", "</b>")  # Sostituire *con <b> per grassetto
+    content = content.replace("*", "<b>").replace("*", "</b>")  # Sostituire * con <b> per grassetto
     content = content.replace("_", "<i>").replace("_", "</i>")  # Sostituire _ con <i> per corsivo
     content = content.replace("~", "<u>").replace("~", "</u>")  # Sostituire ~ con <u> per sottolineato
 
@@ -81,18 +95,14 @@ def publish_to_wordpress(title, content):
 
 # Streamlit UI
 st.title("Generatore di articoli con Gemini AI")
-keywords = st.text_input("Inserisci le parole chiave")
 
 if st.button("Genera e Pubblica Articolo"):
-    if keywords.strip():  # Verifica che le parole chiave non siano vuote
-        st.info("Generazione dell'articolo in corso...")
-        article_content = generate_article_gemini(keywords)
-        st.write("Contenuto generato:", article_content)  # Debug
-        if article_content:
-            # Formattiamo il contenuto prima di inviarlo
-            formatted_content = format_content(article_content)
-            title = keywords.capitalize()  # Usa le parole chiave come titolo, ma personalizzato se necessario
-            title = title.replace("Articolo su", "").strip()  # Rimuove "Articolo su" se presente
-            publish_to_wordpress(title, formatted_content)
-    else:
-        st.warning("Inserisci delle parole chiave valide!")
+    st.info("Generazione dell'articolo in corso...")
+    article_content = generate_article_gemini()
+    st.write("Contenuto generato:", article_content)  # Debug
+    if article_content:
+        # Formattiamo il contenuto prima di inviarlo
+        formatted_content = format_content(article_content)
+        title = "Articolo Psicologico"  # Titolo predefinito per l'articolo
+        publish_to_wordpress(title, formatted_content)
+
