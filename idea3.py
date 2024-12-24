@@ -73,3 +73,7 @@ if st.button("Genera e Pubblica Guida"):
         publish_to_wordpress(title, formatted_content)
 
 
+
+
+
+
